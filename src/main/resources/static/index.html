@@ -1,309 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerCompass India | Pro</title>
+    <title>CareerCompass India | Intelligence for CS Students</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: #f8fafc;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0;
+            color: #1a1a1a;
+            line-height: 1.2;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
         }
-        .input-field {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s ease;
+
+        .swiss-border {
+            border-top: 8px solid #1a1a1a;
         }
-        .input-field:focus {
-            outline: none;
-            border-color: #f97316;
-            box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+
+        .accent-orange {
+            color: #ff4d00;
         }
-        .btn-hover {
-            transition: all 0.3s ease;
+
+        .bg-accent-orange {
+            background-color: #ff4d00;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+        }
+
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
-        .btn-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+
+        .btn-action:hover {
+            background-color: #ff4d00;
+            color: white;
+            border-color: #ff4d00;
         }
-        .btn-hover:active {
-            transform: translateY(0);
+
+        .skill-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
         }
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-        .progress-bar-container {
-            background: rgba(255,255,255,0.1);
-            border-radius: 999px;
-            overflow: hidden;
-            height: 12px;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f97316, #fbbf24);
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .animate-results {
+            animation: slideUp 0.4s forwards;
         }
     </style>
 </head>
-<body class="overflow-hidden">
 
-<header class="glass-panel border-b border-white/10 p-6 flex items-center justify-between z-10 sticky top-0">
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-orange-500/30">
-            <i data-lucide="compass" class="text-white"></i>
-        </div>
-        <div>
-            <h1 class="text-2xl font-extrabold tracking-tight">CareerCompass <span class="text-orange-500">India.</span></h1>
-            <p class="text-xs text-slate-400 font-medium">Live job market intelligence for Indian CS students</p>
-        </div>
-    </div>
-</header>
+<body class="p-6 md:p-16">
 
-<div class="flex flex-1 h-[calc(100vh-89px)]">
-    <!-- Sidebar -->
-    <aside class="w-80 glass-panel border-r border-white/10 p-6 flex flex-col gap-6 overflow-y-auto z-10">
-        <div class="space-y-4">
-            <div>
-                <label class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Target Role</label>
-                <input id="role" value="software engineer" placeholder="e.g. backend engineer" class="input-field w-full rounded-lg px-4 py-3 mt-1 text-sm font-medium">
+    <div class="max-w-7xl mx-auto">
+        <header class="grid-container mb-20">
+            <div class="col-span-12 md:col-span-8">
+                <h1 class="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-[0.85]">
+                    Career<br>Compass<br><span class="accent-orange">India.</span>
+                </h1>
             </div>
-            <div>
-                <label class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Target City</label>
-                <input id="city" value="Mumbai" placeholder="e.g. Bangalore" class="input-field w-full rounded-lg px-4 py-3 mt-1 text-sm font-medium">
+            <div class="col-span-12 md:col-span-4 flex flex-col justify-end pt-8 md:pt-0">
+                <p class="text-xl font-bold border-l-8 border-black pl-6">
+                    Real-time job market intelligence for the next generation of Indian engineers.
+                </p>
+                <p class="mt-4 text-sm text-gray-500 font-medium">v1.0 / Market Analysis Tool</p>
             </div>
-            <div>
-                <label class="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Your Skills</label>
-                <input id="skills" placeholder="Java, Python, Git" class="input-field w-full rounded-lg px-4 py-3 mt-1 text-sm font-medium">
-            </div>
-        </div>
+        </header>
 
-        <div class="space-y-3 mt-4">
-            <button onclick="load('demand')" class="btn-hover w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 px-4 flex items-center gap-3 font-semibold text-sm transition-colors">
-                <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-400"></i> Market Demand
-            </button>
-            <button onclick="load('gap')" class="btn-hover w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 px-4 flex items-center gap-3 font-semibold text-sm transition-colors">
-                <i data-lucide="target" class="w-5 h-5 text-emerald-400"></i> Skill Gap
-            </button>
-            <button onclick="load('curriculum')" class="btn-hover w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 px-4 flex items-center gap-3 font-semibold text-sm transition-colors">
-                <i data-lucide="book-open" class="w-5 h-5 text-purple-400"></i> Curriculum Audit
-            </button>
-        </div>
-    </aside>
+        <main class="grid-container">
+            <aside class="col-span-12 lg:col-span-4 space-y-12">
+                <div class="swiss-border pt-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest mb-8">01 / Parameters</h2>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-8 overflow-y-auto relative">
-        <!-- Decoration -->
-        <div class="absolute top-[-20%] left-[-10%] w-96 h-96 bg-orange-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-        <div class="absolute bottom-[-20%] right-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-
-        <div id="output" class="glass-panel border-white/10 rounded-2xl p-8 min-h-[400px] relative z-10 shadow-2xl">
-            <div class="h-full flex flex-col items-center justify-center text-slate-500 fade-in py-20">
-                <i data-lucide="activity" class="w-16 h-16 mb-4 opacity-50"></i>
-                <p class="font-medium text-slate-400">Select an analysis from the left panel to begin.</p>
-            </div>
-        </div>
-    </main>
-</div>
-
-<script>
-    lucide.createIcons();
-    
-    const out = document.getElementById('output');
-    const role = () => document.getElementById('role').value;
-    const city = () => document.getElementById('city').value;
-    const skills = () => document.getElementById('skills').value;
-
-    async function load(type) {
-        if (!role() || !city()) { alert('Please enter role and city'); return; }
-        
-        out.innerHTML = `
-            <div class="h-full flex flex-col items-center justify-center py-20 fade-in">
-                <div class="w-12 h-12 border-4 border-slate-700 border-t-orange-500 rounded-full animate-spin"></div>
-                <p class="mt-6 text-sm font-bold tracking-widest uppercase text-slate-400">Processing Data...</p>
-            </div>
-        `;
-
-        try {
-            if (type === 'demand') {
-                const res = await fetch(`/api/skills/demand?role=${encodeURIComponent(role())}&city=${encodeURIComponent(city())}&topN=15`);
-                const data = await res.json();
-                
-                out.innerHTML = `
-                    <div class="fade-in h-full flex flex-col">
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="p-2 bg-blue-500/20 rounded-lg"><i data-lucide="bar-chart-2" class="text-blue-400"></i></div>
-                            <h2 class="text-3xl font-extrabold">Market Demand</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Target Role</label>
+                            <input id="role" type="text" placeholder="e.g. Backend Engineer"
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300">
                         </div>
-                        <div class="flex-1 min-h-[400px] relative">
-                            <canvas id="chart"></canvas>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Target City</label>
+                            <input id="city" type="text" placeholder="e.g. Bengaluru"
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Current Skills</label>
+                            <textarea id="userSkills" rows="3" placeholder="Java, Python, Git..."
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300"></textarea>
                         </div>
                     </div>
-                `;
-                lucide.createIcons();
-                
-                const ctx = document.getElementById('chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'pie',
-                    data: { 
-                        labels: data.map(d => d.name), 
-                        datasets: [{ 
-                            data: data.map(d => d.demandCount), 
-                            backgroundColor: data.map((_, i) => `hsla(${i * 360 / data.length}, 80%, 60%, 0.8)`),
-                            borderColor: 'transparent',
-                            hoverOffset: 10
-                        }] 
-                    },
-                    options: { 
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 14 } } } 
-                        } 
-                    }
-                });
-            }
-            if (type === 'gap') {
-                const list = skills().split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-                if (!list.length) { alert('Please enter your skills'); return; }
-                const res = await fetch(`/api/skills/gap?role=${encodeURIComponent(role())}&city=${encodeURIComponent(city())}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(list)
-                });
-                const d = await res.json();
-                const matched = d.matchedSkills || [];
-                const missing = d.missingSkills || [];
-                const recs = d.reccommendations || d.recommendations || [];
-                
-                out.innerHTML = `
-                    <div class="fade-in">
-                        <div class="flex items-center justify-between mb-8">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-emerald-500/20 rounded-lg"><i data-lucide="target" class="text-emerald-400"></i></div>
-                                <h2 class="text-3xl font-extrabold">Skill Gap Analysis</h2>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">
-                                    ${Math.round(d.matchScore || 0)}%
-                                </div>
-                                <div class="text-xs font-bold tracking-widest uppercase text-slate-400">Match Score</div>
-                            </div>
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-6">
-                                <div>
-                                    <h3 class="text-sm font-bold tracking-widest text-slate-400 uppercase mb-3 border-b border-white/10 pb-2">Matched Proficiencies</h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${matched.length ? matched.map(s => `<span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-bold uppercase tracking-wide">${s}</span>`).join('') : '<span class="text-slate-500 text-sm italic">None matched</span>'}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h3 class="text-sm font-bold tracking-widest text-slate-400 uppercase mb-3 border-b border-white/10 pb-2">Missing Critical Skills</h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${missing.length ? missing.map(s => `<span class="px-3 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-full text-xs font-bold uppercase tracking-wide">${s}</span>`).join('') : '<span class="text-emerald-400 text-sm font-bold">No gap found!</span>'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="glass-panel border-white/5 bg-white/5 rounded-xl p-6 relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-orange-400 to-amber-300"></div>
-                                <h3 class="text-sm font-bold tracking-widest text-slate-300 uppercase mb-4 flex items-center gap-2">
-                                    <i data-lucide="map" class="w-4 h-4"></i> Roadmap Recommendations
-                                </h3>
-                                <ul class="space-y-3">
-                                    ${recs.map(r => `
-                                        <li class="flex items-start gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
-                                            <i data-lucide="check-circle-2" class="w-5 h-5 text-orange-400 shrink-0 mt-0.5"></i> 
-                                            <span class="text-sm font-medium text-slate-200 uppercase">${r}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="mt-12 flex flex-col gap-4">
+                        <button onclick="handleApi('gap')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Analyze Skill Gap <i data-lucide="arrow-right"></i>
+                        </button>
+                        <button onclick="handleApi('curriculum')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Audit Curriculum <i data-lucide="book"></i>
+                        </button>
+                        <button onclick="handleApi('top')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Market Demand <i data-lucide="bar-chart-3"></i>
+                        </button>
                     </div>
-                `;
-                lucide.createIcons();
-            }
-            if (type === 'curriculum') {
-                const list = skills().split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-                const res = await fetch(`/api/curriculum/gap?role=${encodeURIComponent(role())}&city=${encodeURIComponent(city())}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(list)
-                });
-                const d = await res.json();
-                const perc = Math.round(d.coveragePercentage || 0);
-                
-                out.innerHTML = `
-                    <div class="fade-in">
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="p-2 bg-purple-500/20 rounded-lg"><i data-lucide="book-open" class="text-purple-400"></i></div>
-                            <h2 class="text-3xl font-extrabold">Curriculum Audit</h2>
-                        </div>
-
-                        <div class="glass-panel bg-white/5 border-white/10 rounded-xl p-6 mb-8">
-                            <div class="flex justify-between items-end mb-2">
-                                <span class="text-sm font-bold tracking-widest uppercase text-slate-400">Syllabus Coverage</span>
-                                <span class="text-3xl font-black text-white">${perc}%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" id="bar" style="width:0%"></div>
-                            </div>
-                        </div>
-
-                        <h3 class="text-sm font-bold tracking-widest text-slate-400 uppercase mb-4 border-b border-white/10 pb-2">Subject Relevance Scores</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${Object.entries(d.subjectRelevanceScores || {}).map(([sub, score]) => `
-                                <div class="glass-panel bg-black/20 border-white/5 p-4 rounded-xl flex justify-between items-center transition-transform hover:scale-[1.02]">
-                                    <span class="text-sm font-medium text-slate-300 leading-tight pr-4">${sub}</span>
-                                    <span class="text-xl font-black ${score > 60 ? 'text-emerald-400' : score > 30 ? 'text-amber-400' : 'text-slate-500'}">${Math.round(score)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                lucide.createIcons();
-                setTimeout(() => {
-                    const bar = document.getElementById('bar');
-                    if(bar) bar.style.width = perc + '%';
-                }, 50);
-            }
-        } catch (e) {
-            console.error(e);
-            out.innerHTML = `
-                <div class="h-full flex flex-col items-center justify-center fade-in text-rose-400 py-10">
-                    <i data-lucide="alert-triangle" class="w-12 h-12 mb-4"></i>
-                    <p class="font-bold text-lg">Communication Error</p>
-                    <p class="text-sm text-rose-300/70 mt-2 text-center max-w-sm">Make sure the backend is running and the inputs are valid. (${e.message})</p>
                 </div>
-            `;
-            lucide.createIcons();
+            </aside>
+
+            <section class="col-span-12 lg:col-span-8">
+                <div class="swiss-border pt-4 min-h-[600px] bg-white p-8 md:p-12 shadow-2xl">
+                    <h2 class="text-xs font-black uppercase tracking-widest mb-12">02 / Intelligence Output</h2>
+
+                    <div id="loading-state" class="hidden flex flex-col items-center justify-center h-64">
+                        <div class="w-12 h-12 border-4 border-black border-t-[#ff4d00] animate-spin"></div>
+                        <p class="mt-4 font-black uppercase text-xs tracking-tighter">Processing Market Data...</p>
+                    </div>
+
+                    <div id="results-content" class="animate-results">
+                        <div class="flex flex-col items-center justify-center h-96 text-center opacity-20">
+                            <i data-lucide="compass" class="w-20 h-20 mb-4"></i>
+                            <p class="font-black uppercase italic">Awaiting Input Parameters</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer
+            class="mt-20 border-t border-gray-300 pt-8 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            <div>© 2026 CareerCompass India</div>
+            <div>Built for Indian CS Ecosystem</div>
+        </footer>
+    </div>
+
+    <template id="tpl-gap">
+        <div class="space-y-12">
+            <div class="flex flex-col md:flex-row justify-between items-baseline gap-4">
+                <h3 class="text-5xl font-black uppercase italic tracking-tighter">Gap Analysis</h3>
+                <div class="text-right">
+                    <span id="res-score" class="text-8xl font-black leading-none">0%</span>
+                    <p class="text-[10px] font-black uppercase text-[#ff4d00]">Match Score</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h4 class="text-xs font-black uppercase border-b-2 border-black mb-4">Matched Proficiencies</h4>
+                    <div id="res-matched" class="flex flex-wrap gap-2"></div>
+
+                    <h4 class="text-xs font-black uppercase border-b-2 border-black mb-4 mt-12">Missing Critical Skills
+                    </h4>
+                    <div id="res-missing" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div class="bg-gray-100 p-6 border-l-4 border-[#ff4d00]">
+                    <h4 class="text-xs font-black uppercase mb-4 tracking-widest">Roadmap Recommendations</h4>
+                    <ul id="res-rec" class="space-y-4 text-sm font-bold"></ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-top">
+        <div class="space-y-8">
+            <h3 class="text-5xl font-black uppercase italic tracking-tighter mb-8">Market Demand</h3>
+            <div class="h-[400px]">
+                <canvas id="topChart"></canvas>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-curriculum">
+        <div class="space-y-12">
+            <h3 class="text-5xl font-black uppercase italic tracking-tighter">Curriculum Audit</h3>
+
+            <div class="relative pt-1">
+                <div class="flex mb-2 items-center justify-between">
+                    <div><span
+                            class="text-xs font-black uppercase inline-block py-1 px-2 rounded-full bg-black text-white">Syllabus
+                            Coverage</span></div>
+                    <div class="text-right"><span id="curr-perc" class="text-2xl font-black italic">0%</span></div>
+                </div>
+                <div class="overflow-hidden h-8 mb-4 text-xs flex bg-gray-200">
+                    <div id="curr-bar"
+                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-accent-orange transition-all duration-1000"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="subject-scores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </template>
+
+    <script>
+        lucide.createIcons();
+
+        const results = document.getElementById('results-content');
+        const loader = document.getElementById('loading-state');
+
+        async function handleApi(type) {
+            const role = document.getElementById('role').value;
+            const city = document.getElementById('city').value;
+            const userSkills = document.getElementById('userSkills').value;
+
+            if (!role || !city) {
+                alert("Please enter Role and City");
+                return;
+            }
+
+            results.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                if (type === 'top') {
+                    const response = await fetch(`/api/skills/demand?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}&topN=15`);
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderTop(data);
+                }
+
+                if (type === 'gap') {
+                    const skillsList = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                    if (skillsList.length === 0) {
+                        alert("Please enter your current skills");
+                        loader.classList.add('hidden');
+                        results.classList.remove('hidden');
+                        return;
+                    }
+                    const response = await fetch(`/api/skills/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(skillsList)
+                    });
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderGap(data);
+                }
+
+                if (type === 'curriculum') {
+                    const skillsList = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                    const response = await fetch(`/api/curriculum/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(skillsList)
+                    });
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderCurriculum(data);
+                }
+
+                lucide.createIcons();
+
+            } catch (error) {
+                loader.classList.add('hidden');
+                results.classList.remove('hidden');
+                results.innerHTML = `<div class="text-red-500 font-bold p-4">Error fetching data. Make sure the server is running.</div>`;
+                console.error(error);
+            }
         }
-    }
-</script>
+
+        function renderGap(data) {
+            const tpl = document.getElementById('tpl-gap').content.cloneNode(true);
+            tpl.getElementById('res-score').innerText = `${Math.round(data.matchScore)}%`;
+
+            const matchedDiv = tpl.getElementById('res-matched');
+            data.matchedSkills.forEach(s => {
+                matchedDiv.innerHTML += `<span class="skill-tag border border-black px-2 py-1">${s}</span>`;
+            });
+
+            const missingDiv = tpl.getElementById('res-missing');
+            data.missingSkills.forEach(s => {
+                missingDiv.innerHTML += `<span class="skill-tag bg-black text-white px-2 py-1">${s}</span>`;
+            });
+
+            const recList = tpl.getElementById('res-rec');
+            if (data.reccommendations) {
+                data.reccommendations.forEach(r => {
+                    recList.innerHTML += `<li class="flex items-start gap-2"><i data-lucide="check-square" class="w-4 h-4 mt-1 accent-orange"></i> <span>${r}</span></li>`;
+                });
+            } else if (data.recommendations) {
+                data.recommendations.forEach(r => {
+                    recList.innerHTML += `<li class="flex items-start gap-2"><i data-lucide="check-square" class="w-4 h-4 mt-1 accent-orange"></i> <span>${r}</span></li>`;
+                });
+            }
+
+            results.appendChild(tpl);
+        }
+
+        function renderTop(data) {
+            const tpl = document.getElementById('tpl-top').content.cloneNode(true);
+            results.appendChild(tpl);
+
+            const ctx = document.getElementById('topChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Demand Count',
+                        data: data.map(d => d.demandCount),
+                        backgroundColor: data.map((_, i) => `hsl(${20 + (i * 20)}, 90%, 55%)`),
+                        hoverBackgroundColor: '#1a1a1a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: { weight: 'bold', family: 'Inter' },
+                                color: '#1a1a1a'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCurriculum(data) {
+            const tpl = document.getElementById('tpl-curriculum').content.cloneNode(true);
+            results.appendChild(tpl);
+
+            setTimeout(() => {
+                document.getElementById('curr-bar').style.width = Math.round(data.coveragePercentage) + '%';
+                document.getElementById('curr-perc').innerText = Math.round(data.coveragePercentage) + '%';
+            }, 100);
+
+            const subjectsDiv = document.getElementById('subject-scores');
+            Object.entries(data.subjectRelevanceScores).forEach(([sub, score]) => {
+                subjectsDiv.innerHTML += `
+                    <div class="border-2 border-black p-4 flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase">${sub}</span>
+                        <span class="font-black italic text-lg">${Math.round(score)}</span>
+                    </div>
+                `;
+            });
+        }
+    </script>
 </body>
+
 </html>
