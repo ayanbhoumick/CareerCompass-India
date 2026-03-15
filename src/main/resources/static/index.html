@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass India | Intelligence for CS Students</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+
+        .swiss-border {
+            border-top: 8px solid #1a1a1a;
+        }
+
+        .accent-orange {
+            color: #ff4d00;
+        }
+
+        .bg-accent-orange {
+            background-color: #ff4d00;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+        }
+
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action:hover {
+            background-color: #ff4d00;
+            color: white;
+            border-color: #ff4d00;
+        }
+
+        .skill-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-results {
+            animation: slideUp 0.4s forwards;
+        }
+    </style>
+</head>
+
+<body class="p-6 md:p-16">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="grid-container mb-20">
+            <div class="col-span-12 md:col-span-8">
+                <h1 class="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-[0.85]">
+                    Career<br>Compass<br><span class="accent-orange">India.</span>
+                </h1>
+            </div>
+            <div class="col-span-12 md:col-span-4 flex flex-col justify-end pt-8 md:pt-0">
+                <p class="text-xl font-bold border-l-8 border-black pl-6">
+                    Real-time job market intelligence for the next generation of Indian engineers.
+                </p>
+                <p class="mt-4 text-sm text-gray-500 font-medium">v1.0 / Market Analysis Tool</p>
+            </div>
+        </header>
+
+        <main class="grid-container">
+            <aside class="col-span-12 lg:col-span-4 space-y-12">
+                <div class="swiss-border pt-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest mb-8">01 / Parameters</h2>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Target Role</label>
+                            <input id="role" type="text" placeholder="e.g. Backend Engineer"
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Target City</label>
+                            <input id="city" type="text" placeholder="e.g. Bengaluru"
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase mb-2">Current Skills</label>
+                            <textarea id="userSkills" rows="3" placeholder="Java, Python, Git..."
+                                class="w-full bg-transparent border-b-2 border-black p-2 focus:outline-none focus:border-[#ff4d00] font-bold text-lg placeholder:text-gray-300"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 flex flex-col gap-4">
+                        <button onclick="handleApi('gap')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Analyze Skill Gap <i data-lucide="arrow-right"></i>
+                        </button>
+                        <button onclick="handleApi('curriculum')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Audit Curriculum <i data-lucide="book"></i>
+                        </button>
+                        <button onclick="handleApi('top')"
+                            class="btn-action w-full border-2 border-black py-4 px-6 text-left font-black uppercase text-sm flex justify-between items-center">
+                            Market Demand <i data-lucide="bar-chart-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="col-span-12 lg:col-span-8">
+                <div class="swiss-border pt-4 min-h-[600px] bg-white p-8 md:p-12 shadow-2xl">
+                    <h2 class="text-xs font-black uppercase tracking-widest mb-12">02 / Intelligence Output</h2>
+
+                    <div id="loading-state" class="hidden flex flex-col items-center justify-center h-64">
+                        <div class="w-12 h-12 border-4 border-black border-t-[#ff4d00] animate-spin"></div>
+                        <p class="mt-4 font-black uppercase text-xs tracking-tighter">Processing Market Data...</p>
+                    </div>
+
+                    <div id="results-content" class="animate-results">
+                        <div class="flex flex-col items-center justify-center h-96 text-center opacity-20">
+                            <i data-lucide="compass" class="w-20 h-20 mb-4"></i>
+                            <p class="font-black uppercase italic">Awaiting Input Parameters</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer
+            class="mt-20 border-t border-gray-300 pt-8 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            <div>© 2026 CareerCompass India</div>
+            <div>Built for Indian CS Ecosystem</div>
+        </footer>
+    </div>
+
+    <template id="tpl-gap">
+        <div class="space-y-12">
+            <div class="flex flex-col md:flex-row justify-between items-baseline gap-4">
+                <h3 class="text-5xl font-black uppercase italic tracking-tighter">Gap Analysis</h3>
+                <div class="text-right">
+                    <span id="res-score" class="text-8xl font-black leading-none">0%</span>
+                    <p class="text-[10px] font-black uppercase text-[#ff4d00]">Match Score</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h4 class="text-xs font-black uppercase border-b-2 border-black mb-4">Matched Proficiencies</h4>
+                    <div id="res-matched" class="flex flex-wrap gap-2"></div>
+
+                    <h4 class="text-xs font-black uppercase border-b-2 border-black mb-4 mt-12">Missing Critical Skills
+                    </h4>
+                    <div id="res-missing" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div class="bg-gray-100 p-6 border-l-4 border-[#ff4d00]">
+                    <h4 class="text-xs font-black uppercase mb-4 tracking-widest">Roadmap Recommendations</h4>
+                    <ul id="res-rec" class="space-y-4 text-sm font-bold"></ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-top">
+        <div class="space-y-8">
+            <h3 class="text-5xl font-black uppercase italic tracking-tighter mb-8">Market Demand</h3>
+            <div class="h-[400px]">
+                <canvas id="topChart"></canvas>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-curriculum">
+        <div class="space-y-12">
+            <h3 class="text-5xl font-black uppercase italic tracking-tighter">Curriculum Audit</h3>
+
+            <div class="relative pt-1">
+                <div class="flex mb-2 items-center justify-between">
+                    <div><span
+                            class="text-xs font-black uppercase inline-block py-1 px-2 rounded-full bg-black text-white">Syllabus
+                            Coverage</span></div>
+                    <div class="text-right"><span id="curr-perc" class="text-2xl font-black italic">0%</span></div>
+                </div>
+                <div class="overflow-hidden h-8 mb-4 text-xs flex bg-gray-200">
+                    <div id="curr-bar"
+                        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-accent-orange transition-all duration-1000"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="subject-scores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </template>
+
+    <script>
+        lucide.createIcons();
+
+        const results = document.getElementById('results-content');
+        const loader = document.getElementById('loading-state');
+
+        async function handleApi(type) {
+            const role = document.getElementById('role').value;
+            const city = document.getElementById('city').value;
+            const userSkills = document.getElementById('userSkills').value;
+
+            if (!role || !city) {
+                alert("Please enter Role and City");
+                return;
+            }
+
+            results.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                if (type === 'top') {
+                    const response = await fetch(`/api/skills/demand?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}&topN=15`);
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderTop(data);
+                }
+
+                if (type === 'gap') {
+                    const skillsList = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                    if (skillsList.length === 0) {
+                        alert("Please enter your current skills");
+                        loader.classList.add('hidden');
+                        results.classList.remove('hidden');
+                        return;
+                    }
+                    const response = await fetch(`/api/skills/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(skillsList)
+                    });
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderGap(data);
+                }
+
+                if (type === 'curriculum') {
+                    const skillsList = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                    const response = await fetch(`/api/curriculum/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(skillsList)
+                    });
+                    const data = await response.json();
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    results.innerHTML = '';
+                    renderCurriculum(data);
+                }
+
+                lucide.createIcons();
+
+            } catch (error) {
+                loader.classList.add('hidden');
+                results.classList.remove('hidden');
+                results.innerHTML = `<div class="text-red-500 font-bold p-4">Error fetching data. Make sure the server is running.</div>`;
+                console.error(error);
+            }
+        }
+
+        function renderGap(data) {
+            const tpl = document.getElementById('tpl-gap').content.cloneNode(true);
+            tpl.getElementById('res-score').innerText = `${Math.round(data.matchScore)}%`;
+
+            const matchedDiv = tpl.getElementById('res-matched');
+            data.matchedSkills.forEach(s => {
+                matchedDiv.innerHTML += `<span class="skill-tag border border-black px-2 py-1">${s}</span>`;
+            });
+
+            const missingDiv = tpl.getElementById('res-missing');
+            data.missingSkills.forEach(s => {
+                missingDiv.innerHTML += `<span class="skill-tag bg-black text-white px-2 py-1">${s}</span>`;
+            });
+
+            const recList = tpl.getElementById('res-rec');
+            if (data.reccommendations) {
+                data.reccommendations.forEach(r => {
+                    recList.innerHTML += `<li class="flex items-start gap-2"><i data-lucide="check-square" class="w-4 h-4 mt-1 accent-orange"></i> <span>${r}</span></li>`;
+                });
+            } else if (data.recommendations) {
+                data.recommendations.forEach(r => {
+                    recList.innerHTML += `<li class="flex items-start gap-2"><i data-lucide="check-square" class="w-4 h-4 mt-1 accent-orange"></i> <span>${r}</span></li>`;
+                });
+            }
+
+            results.appendChild(tpl);
+        }
+
+        function renderTop(data) {
+            const tpl = document.getElementById('tpl-top').content.cloneNode(true);
+            results.appendChild(tpl);
+
+            const ctx = document.getElementById('topChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Demand Count',
+                        data: data.map(d => d.demandCount),
+                        backgroundColor: data.map((_, i) => `hsl(${20 + (i * 20)}, 90%, 55%)`),
+                        hoverBackgroundColor: '#1a1a1a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'right',
+                            labels: {
+                                font: { weight: 'bold', family: 'Inter' },
+                                color: '#1a1a1a'
+                            }
+                        } 
+                    }
+                }
+            });
+        }
+
+        function renderCurriculum(data) {
+            const tpl = document.getElementById('tpl-curriculum').content.cloneNode(true);
+            results.appendChild(tpl);
+
+            setTimeout(() => {
+                document.getElementById('curr-bar').style.width = Math.round(data.coveragePercentage) + '%';
+                document.getElementById('curr-perc').innerText = Math.round(data.coveragePercentage) + '%';
+            }, 100);
+
+            const subjectsDiv = document.getElementById('subject-scores');
+            Object.entries(data.subjectRelevanceScores).forEach(([sub, score]) => {
+                subjectsDiv.innerHTML += `
+                    <div class="border-2 border-black p-4 flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase">${sub}</span>
+                        <span class="font-black italic text-lg">${Math.round(score)}</span>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+
+</html>
