@@ -32,10 +32,10 @@ public class SkillController {
     // Health check
     @GetMapping("/health")
     public String health() {
-        return "CareerCompass is running!";
+        return "BTech Radar is running!";
     }
 
-    // Get top demanded skills for a role and city
+    // get top demanded skills for a role and city
     @GetMapping("/skills/demand")
     public List<Skill> getSkillDemand(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
@@ -50,7 +50,7 @@ public class SkillController {
         return skillExtractorService.getTopDemandedSkills(descriptions, topN);
     }
 
-    // Get skill gap report for a student
+    // get skill gap report for a student
     @PostMapping("/skills/gap")
     public SkillGapReport getSkillGap(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
@@ -60,7 +60,7 @@ public class SkillController {
         return skillGapService.analyzeGap(studentSkills, role, city);
     }
 
-    // Get curriculum gap report
+    // get curriculum gap report
     @PostMapping("/curriculum/gap")
     public CurriculumGapReport getCurriculumGap(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
@@ -70,5 +70,3 @@ public class SkillController {
         return curriculumGapService.analyzeCurriculum(studentSkills, role, city);
     }
 }
-    
-
