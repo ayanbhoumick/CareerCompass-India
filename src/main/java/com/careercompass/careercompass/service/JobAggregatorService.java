@@ -1,6 +1,7 @@
 package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.model.JobListing;
+import com.careercompass.careercompass.repository.JobListingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,26 +18,22 @@ public class JobAggregatorService {
     private JSearchFetchService jSearchService;
 
     @Autowired
-    private CareerJetFetchService careerJetService;
+    private JobListingRepository jobListingRepository;
 
     public List<JobListing> fetchJobs(String role, String city) {
-        // Run all three providers in parallel
+        // Run both providers in parallel
         CompletableFuture<List<JobListing>> adzunaFuture =
                 CompletableFuture.supplyAsync(() -> adzunaService.fetchJobs(role, city));
 
         CompletableFuture<List<JobListing>> jSearchFuture =
                 CompletableFuture.supplyAsync(() -> jSearchService.fetchJobs(role, city));
 
-        CompletableFuture<List<JobListing>> careerJetFuture =
-                CompletableFuture.supplyAsync(() -> careerJetService.fetchJobs(role, city));
-
-        CompletableFuture.allOf(adzunaFuture, jSearchFuture, careerJetFuture).join();
+        CompletableFuture.allOf(adzunaFuture, jSearchFuture).join();
 
         // Merge results (each provider handles its own errors and returns empty list on failure)
         List<JobListing> merged = new ArrayList<>();
         try { merged.addAll(adzunaFuture.get()); } catch (Exception e) { System.out.println("Adzuna result error: " + e.getMessage()); }
         try { merged.addAll(jSearchFuture.get()); } catch (Exception e) { System.out.println("JSearch result error: " + e.getMessage()); }
-        try { merged.addAll(careerJetFuture.get()); } catch (Exception e) { System.out.println("CareerJet result error: " + e.getMessage()); }
 
         // Deduplicate by normalized title + company
         List<JobListing> deduplicated = new ArrayList<>();
@@ -50,6 +47,10 @@ public class JobAggregatorService {
         }
 
         System.out.println("Aggregated " + merged.size() + " jobs, " + deduplicated.size() + " after deduplication");
+
+        jobListingRepository.deleteAll();
+        jobListingRepository.saveAll(deduplicated);
+
         return deduplicated;
     }
 

@@ -3,7 +3,7 @@ package com.careercompass.careercompass.controller;
 import com.careercompass.careercompass.model.Skill;
 import com.careercompass.careercompass.model.SkillGapReport;
 import com.careercompass.careercompass.model.CurriculumGapReport;
-import com.careercompass.careercompass.service.JobFetchService;
+import com.careercompass.careercompass.service.JobAggregatorService;
 import com.careercompass.careercompass.service.SkillExtractorService;
 import com.careercompass.careercompass.service.SkillGapService;
 import com.careercompass.careercompass.service.CurriculumGapService;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class SkillController {
     @Autowired
-    private JobFetchService jobFetchService;
+    private JobAggregatorService jobFetchService;
 
     @Autowired
     private SkillExtractorService skillExtractorService;

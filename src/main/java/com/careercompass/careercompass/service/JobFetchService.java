@@ -1,8 +1,6 @@
 package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.model.JobListing;
-import com.careercompass.careercompass.repository.JobListingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -14,9 +12,6 @@ import java.util.List;
 
 @Service
 public class JobFetchService {
-
-    @Autowired
-    private JobListingRepository jobListingRepository;
 
     @Value("${adzuna.app.id}")
     private String appId;
@@ -39,27 +34,21 @@ public class JobFetchService {
             JsonNode json = new ObjectMapper().readTree(response);
             JsonNode results = json.get("results");
 
-            // Clear old results before saving new ones
-            jobListingRepository.deleteAll();
-
             List<JobListing> listings = new ArrayList<>();
 
             for (int i = 0; i < results.size(); i++) {
                 JsonNode job = results.get(i);
 
-                String title = job.path("title").asText( "Unknown");
-                String description = job.path("description").asText( "");
+                String title = job.path("title").asText("Unknown");
+                String description = job.path("description").asText("");
                 String location = job.path("location").path("display_name").asText(city);
                 String company = job.path("company").path("display_name").asText("Unknown");
                 Double salaryMin = job.path("salary_min").asDouble(0.0);
                 Double salaryMax = job.path("salary_max").asDouble(0.0);
 
-                JobListing listing = new JobListing(title, company, location,
-                        description, salaryMin, salaryMax);
-                listings.add(listing);
+                listings.add(new JobListing(title, company, location, description, salaryMin, salaryMax));
             }
 
-            jobListingRepository.saveAll(listings);
             return listings;
 
         } catch (Exception e) {
@@ -81,7 +70,6 @@ public class JobFetchService {
                 "Python sql data analysis tableau aws docker postgresql machine learning", 800000.0, 1500000.0));
         mockJobs.add(new JobListing("DevOps Engineer", "Tech Mahindra", "Chennai",
                 "Docker kubernetes aws jenkins linux git microservices python shell scripting", 900000.0, 1800000.0));
-        jobListingRepository.saveAll(mockJobs);
         return mockJobs;
     }
 }

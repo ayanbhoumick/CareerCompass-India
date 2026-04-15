@@ -16,7 +16,7 @@
     <main class="home-main">
         <section class="hero-section">
             <span class="hero-meta">v2.0 / Market Analysis Tool</span>
-            <div class="ascii-hero" id="ascii-hero"></div>
+            <h1 class="hero-title">BTech Radar</h1>
             <p class="hero-tagline">Real-time job market intelligence for the next generation of Indian engineers.</p>
         </section>
 
@@ -45,9 +45,7 @@
         <span>Built for Indian CS Ecosystem</span>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script>
-        // ── Theme ────────────────────────────────────────────────
         if (localStorage.getItem('theme') === 'dark' ||
             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -56,108 +54,6 @@
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         }
-
-        // ── ASCII Particle Effect ────────────────────────────────
-        async function initAsciiParticles() {
-            await document.fonts.ready;
-
-            const container = document.getElementById('ascii-hero');
-            const containerWidth = Math.min(container.offsetWidth, 900);
-            if (containerWidth === 0) return;
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            const fontSize = Math.floor(containerWidth / 5.5);
-            const lineHeight = Math.floor(fontSize * 1.15);
-            const lines = ['BTech', 'Radar'];
-
-            canvas.width  = containerWidth;
-            canvas.height = lineHeight * lines.length + Math.floor(fontSize * 0.2);
-
-            ctx.font = `700 ${fontSize}px 'Geist Mono', monospace`;
-            ctx.fillStyle = '#ffffff';
-            lines.forEach((line, i) => {
-                ctx.fillText(line, 0, (i + 1) * lineHeight - Math.floor(fontSize * 0.1));
-            });
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-
-            const ascii  = '!@#$%^&*()_+-=[]{}|;:,./<>?~0123456789';
-            const gap    = 8;
-            const spans  = [];
-
-            container.style.height = canvas.height + 'px';
-
-            const isDark = document.documentElement.classList.contains('dark');
-            const color  = isDark ? '#f0f0f0' : '#111111';
-
-            for (let y = 0; y < canvas.height; y += gap) {
-                for (let x = 0; x < canvas.width; x += gap) {
-                    const i = (y * canvas.width + x) * 4;
-                    if (pixels[i + 3] > 100) {
-                        const span = document.createElement('span');
-                        span.textContent = ascii[Math.floor(Math.random() * ascii.length)];
-                        span.style.cssText = [
-                            'position:absolute',
-                            `left:${x}px`,
-                            `top:${y}px`,
-                            'font-size:7px',
-                            'line-height:1',
-                            `color:${color}`,
-                            "font-family:'Geist Mono',monospace",
-                            'user-select:none',
-                            'pointer-events:none',
-                        ].join(';');
-                        container.appendChild(span);
-                        spans.push(span);
-                    }
-                }
-            }
-
-            // Animate in — particles scatter from random positions
-            gsap.set(spans, {
-                opacity: 0,
-                x: () => (Math.random() - 0.5) * 600,
-                y: () => (Math.random() - 0.5) * 300,
-            });
-            gsap.to(spans, {
-                opacity: 1,
-                x: 0,
-                y: 0,
-                duration: 1.6,
-                ease: 'power3.out',
-                stagger: { amount: 0.9, from: 'random' },
-            });
-
-            // Hover — scatter and reassemble
-            let hovered = false;
-            container.style.pointerEvents = 'auto';
-            container.addEventListener('mouseenter', () => {
-                if (hovered) return;
-                hovered = true;
-                gsap.to(spans, {
-                    x: () => (Math.random() - 0.5) * 280,
-                    y: () => (Math.random() - 0.5) * 140,
-                    opacity: () => Math.random() * 0.4 + 0.2,
-                    duration: 0.5,
-                    ease: 'power2.out',
-                    stagger: { amount: 0.25, from: 'random' },
-                });
-            });
-            container.addEventListener('mouseleave', () => {
-                hovered = false;
-                gsap.to(spans, {
-                    x: 0, y: 0, opacity: 1,
-                    duration: 0.9,
-                    ease: 'power3.out',
-                    stagger: { amount: 0.4, from: 'random' },
-                });
-            });
-        }
-
-        initAsciiParticles();
     </script>
 </body>
 </html>
