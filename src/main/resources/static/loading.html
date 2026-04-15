@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading | BTech Radar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;600&display=swap">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #f5f5f5; }
+        body { transition: opacity 0.7s ease; }
+        body.fade-out { opacity: 0; }
+
+        /* ── Stars background ─────────────────────────────────── */
+        #stars-bg {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at bottom, #e0e0e0 0%, #f5f5f5 100%);
+            overflow: hidden;
+            z-index: 0;
+        }
+        #stars-mover {
+            position: absolute;
+            inset: 0;
+            will-change: transform;
+        }
+        .star-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 2000px;
+        }
+        .star-layer.l1 { animation: scrollStars 50s  linear infinite; }
+        .star-layer.l2 { animation: scrollStars 100s linear infinite; }
+        .star-layer.l3 { animation: scrollStars 150s linear infinite; }
+        .star-dot {
+            position: absolute;
+            background: transparent;
+            border-radius: 50%;
+        }
+        .star-dot.clone { top: 2000px; }
+
+        @keyframes scrollStars {
+            from { transform: translateY(0); }
+            to   { transform: translateY(-2000px); }
+        }
+
+        /* ── Centered overlay ─────────────────────────────────── */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-family: 'Geist Mono', monospace;
+        }
+        #tetris-canvas {
+            border: 1px solid rgba(0,0,0,0.1);
+            display: block;
+            image-rendering: pixelated;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .label {
+            font-size: 0.58rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: rgba(0,0,0,0.35);
+        }
+        .progress-bar {
+            width: 160px;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: progressFill 10s linear forwards;
+        }
+        @keyframes progressFill { to { transform: scaleX(1); } }
+    </style>
+</head>
+<body>
+
+    <!-- Stars background -->
+    <div id="stars-bg">
+        <div id="stars-mover">
+            <div class="star-layer l1">
+                <div class="star-dot" id="s1"  style="width:1px;height:1px;"></div>
+                <div class="star-dot clone" id="s1b" style="width:1px;height:1px;"></div>
+            </div>
+            <div class="star-layer l2">
+                <div class="star-dot" id="s2"  style="width:2px;height:2px;"></div>
+                <div class="star-dot clone" id="s2b" style="width:2px;height:2px;"></div>
+            </div>
+            <div class="star-layer l3">
+                <div class="star-dot" id="s3"  style="width:3px;height:3px;"></div>
+                <div class="star-dot clone" id="s3b" style="width:3px;height:3px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tetris + UI -->
+    <div id="overlay">
+        <canvas id="tetris-canvas"></canvas>
+        <div class="progress-bar"></div>
+        <p class="label">Initialising Radar</p>
+    </div>
+
+    <script>
+    // ── Star generation ───────────────────────────────────────
+    (function () {
+        function generateStars(count, color) {
+            const s = [];
+            for (let i = 0; i < count; i++) {
+                const x = Math.floor(Math.random() * 4000) - 2000;
+                const y = Math.floor(Math.random() * 4000) - 2000;
+                s.push(`${x}px ${y}px ${color}`);
+            }
+            return s.join(',');
+        }
+
+        const layers = [
+            { ids: ['s1','s1b'],  count: 1000, color: 'rgba(0,0,0,0.18)' },
+            { ids: ['s2','s2b'],  count:  400, color: 'rgba(0,0,0,0.22)' },
+            { ids: ['s3','s3b'],  count:  200, color: 'rgba(0,0,0,0.28)' },
+        ];
+
+        layers.forEach(({ ids, count, color }) => {
+            const shadow = generateStars(count, color);
+            ids.forEach(id => document.getElementById(id).style.boxShadow = shadow);
+        });
+    })();
+
+    // ── Mouse parallax (spring) ───────────────────────────────
+    (function () {
+        const mover = document.getElementById('stars-mover');
+        let tx = 0, ty = 0, cx = 0, cy = 0;
+        const FACTOR = 0.05;
+
+        window.addEventListener('mousemove', e => {
+            tx = -(e.clientX - window.innerWidth  / 2) * FACTOR;
+            ty = -(e.clientY - window.innerHeight / 2) * FACTOR;
+        });
+
+        (function spring() {
+            cx += (tx - cx) * 0.06;
+            cy += (ty - cy) * 0.06;
+            mover.style.transform = `translate(${cx}px,${cy}px)`;
+            requestAnimationFrame(spring);
+        })();
+    })();
+
+    // ── Tetris loader ─────────────────────────────────────────
+    (function () {
+        const COLS = 8, ROWS = 16, CELL = 22;
+        const canvas = document.getElementById('tetris-canvas');
+        canvas.width  = COLS * CELL;
+        canvas.height = ROWS * CELL;
+        const ctx = canvas.getContext('2d');
+
+        const SHAPES = [
+            [[1,1,1,1]],
+            [[1,1],[1,1]],
+            [[0,1,0],[1,1,1]],
+            [[1,0],[1,0],[1,1]],
+            [[0,1,1],[1,1,0]],
+            [[1,1,0],[0,1,1]],
+            [[0,1],[0,1],[1,1]],
+        ];
+
+        let grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+        let piece = null;
+
+        const rotate = s => Array.from({length: s[0].length}, (_, j) =>
+            Array.from({length: s.length}, (_, i) => s[s.length-1-i][j]));
+
+        function newPiece() {
+            let s = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+            const r = Math.floor(Math.random() * 4);
+            for (let i = 0; i < r; i++) s = rotate(s);
+            return { shape: s, x: Math.floor(Math.random() * (COLS - s[0].length + 1)), y: -s.length };
+        }
+
+        function canPlace(p, nx, ny) {
+            for (let r = 0; r < p.shape.length; r++)
+                for (let c = 0; c < p.shape[r].length; c++) {
+                    if (!p.shape[r][c]) continue;
+                    const gx = nx+c, gy = ny+r;
+                    if (gx < 0 || gx >= COLS || gy >= ROWS) return false;
+                    if (gy >= 0 && grid[gy][gx]) return false;
+                }
+            return true;
+        }
+
+        function placePiece(p) {
+            for (let r = 0; r < p.shape.length; r++)
+                for (let c = 0; c < p.shape[r].length; c++)
+                    if (p.shape[r][c] && p.y+r >= 0) grid[p.y+r][p.x+c] = 1;
+        }
+
+        function clearLines() {
+            const kept = grid.filter(row => !row.every(c => c));
+            const added = ROWS - kept.length;
+            grid = [...Array.from({length: added}, () => Array(COLS).fill(0)), ...kept];
+        }
+
+        function checkReset() {
+            if (grid.slice(0,3).flat().filter(c=>c).length > COLS*3*0.6) {
+                grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+                return true;
+            }
+            return false;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+            ctx.lineWidth = 0.5;
+            for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0,r*CELL); ctx.lineTo(canvas.width,r*CELL); ctx.stroke(); }
+            for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c*CELL,0); ctx.lineTo(c*CELL,canvas.height); ctx.stroke(); }
+
+            ctx.fillStyle = 'rgba(0,0,0,0.82)';
+            for (let r = 0; r < ROWS; r++)
+                for (let c = 0; c < COLS; c++)
+                    if (grid[r][c]) ctx.fillRect(c*CELL+1, r*CELL+1, CELL-2, CELL-2);
+
+            if (piece) {
+                ctx.fillStyle = 'rgba(0,0,0,0.9)';
+                for (let r = 0; r < piece.shape.length; r++)
+                    for (let c = 0; c < piece.shape[r].length; c++)
+                        if (piece.shape[r][c] && piece.y+r >= 0)
+                            ctx.fillRect((piece.x+c)*CELL+1, (piece.y+r)*CELL+1, CELL-2, CELL-2);
+            }
+        }
+
+        piece = newPiece();
+        let last = 0;
+        (function loop(ts) {
+            if (ts - last >= 80) {
+                last = ts;
+                checkReset();
+                if (!piece) piece = newPiece();
+                if (canPlace(piece, piece.x, piece.y+1)) { piece.y++; }
+                else { placePiece(piece); clearLines(); piece = newPiece(); }
+            }
+            draw();
+            requestAnimationFrame(loop);
+        })(0);
+    })();
+
+    // ── Redirect after 10s ────────────────────────────────────
+    setTimeout(() => {
+        document.body.classList.add('fade-out');
+        setTimeout(() => window.location.href = '/radar.html', 700);
+    }, 10000);
+    </script>
+</body>
+</html>

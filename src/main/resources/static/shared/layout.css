@@ -372,25 +372,164 @@ select.input option { background: var(--bg); color: var(--text); }
 }
 
 /* ─── Homepage ────────────────────────────────────────────── */
-.home-main { padding: 0 32px 48px; max-width: 1200px; margin: 0 auto; }
-.hero-section {
-  padding: 64px 0 48px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 48px;
+.home-main {
+  padding: 0 32px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--nav-h));
 }
+.home-main .cards-section {
+  margin-top: auto;
+  padding-bottom: 32px;
+}
+
+/* ─── Starfield Background ────────────────────────────────── */
+:root { --animation-iteration: infinite; }
+
+#starfield-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #000;
+  overflow: hidden;
+}
+#starfield-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes animGravity {
+  0%        { transform: translateY(-26px); opacity: 0; }
+  30%, 80%  { letter-spacing: 4px; padding-left: 4px; transform: translateY(0px); opacity: 1; }
+  92%, 100% { letter-spacing: 2px; padding-left: 2px; transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animDont {
+  0%, 15%   { transform: translateY(-26px); opacity: 0; }
+  35%, 80%  { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animLet {
+  0%, 25%   { transform: translateY(-26px); opacity: 0; }
+  45%, 80%  { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animGo {
+  0%, 35%   { transform: translateY(-26px); opacity: 0; }
+  55%, 80%  { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+
+#wave-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;
+}
+
+/* ─── Hero Section ────────────────────────────────────────── */
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 32px 32px;
+  margin-bottom: 32px;
+}
+
 .hero-title {
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 5rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 24px;
+  color: #ffffff;
+  margin-bottom: 20px;
 }
+
+/* ─── Card Radar Icon ─────────────────────────────────────── */
+.card-radar {
+  display: inline-block;
+  position: relative;
+  width: 0.85em;
+  height: 0.85em;
+  vertical-align: middle;
+  transform: translateY(-0.1em);
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.7);
+  box-sizing: border-box;
+  overflow: hidden;
+  margin-left: 0.35em;
+}
+.card-radar .radar-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,255,255,0.85) 0deg,
+    rgba(255,255,255,0.2) 45deg,
+    transparent 85deg,
+    transparent 360deg
+  );
+  animation: radarSweep 2.5s linear infinite;
+}
+.card-radar .radar-ring-mid {
+  position: absolute;
+  inset: 25%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.35);
+  pointer-events: none;
+}
+.card-radar .radar-ring-inner {
+  position: absolute;
+  inset: 52%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+.card-radar .radar-center-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.hero-subtitle-wrap {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: baseline;
+  min-height: 2rem;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.hero-subtitle-wrap span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.45);
+  opacity: 0;
+  display: inline-block;
+}
+.subtitle-part-1 { animation: animGravity 7s ease var(--animation-iteration); }
+.subtitle-part-2 { animation: animDont    7s ease var(--animation-iteration); }
+.subtitle-part-3 { animation: animLet     7s ease var(--animation-iteration); }
+.subtitle-part-4 { animation: animGo      7s ease var(--animation-iteration); }
+
 .hero-tagline {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.3);
   font-weight: 500;
-  max-width: 380px;
+  max-width: 400px;
 }
 .hero-meta {
   display: inline-block;
@@ -398,11 +537,40 @@ select.input option { background: var(--bg); color: var(--text); }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  color: rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
   padding: 3px 8px;
   border-radius: 3px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+/* ─── Glass UI overrides for wave page ───────────────────── */
+.wave-page .nav {
+  background: rgba(5, 4, 12, 0.72);
+  border-bottom-color: rgba(255,255,255,0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.wave-page .nav-wordmark { color: rgba(255,255,255,0.85); }
+.wave-page .feature-card {
+  background: rgba(8, 6, 20, 0.55);
+  border-color: rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #f0f0f0;
+}
+.wave-page .feature-card:hover {
+  background: rgba(15, 12, 35, 0.7);
+  border-color: rgba(255,255,255,0.18);
+}
+.wave-page .card-number,
+.wave-page .card-desc { color: rgba(255,255,255,0.4); }
+.wave-page .card-badge { color: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.1); }
+.wave-page .footer {
+  background: rgba(5, 4, 12, 0.6);
+  border-top-color: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  color: rgba(255,255,255,0.3);
 }
 .cards-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 640px) { .cards-section { grid-template-columns: 1fr; } }
@@ -432,7 +600,47 @@ select.input option { background: var(--bg); color: var(--text); }
 .card-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
 .card-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.55; flex: 1; }
 .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-.card-arrow { font-size: 0.75rem; color: var(--text-muted); }
+.card-arrow {
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  padding: 6px 14px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: transform 0.5s ease, color 0.5s ease;
+}
+.card-arrow::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 220px;
+  height: 220px;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  transform: translate(60%, 60%);
+  transition: transform 1.4s ease;
+}
+.feature-card:hover .card-arrow {
+  transform: scale(1.05);
+  color: #0a0a0a;
+  border-color: transparent;
+}
+.feature-card:hover .card-arrow::before {
+  transform: translate(-50%, -50%);
+}
+.feature-card:active .card-arrow { transform: scale(0.95); }
 .card-badge {
   font-size: 0.55rem;
   font-weight: 700;

@@ -1,32 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTech Radar | Intelligence for Indian Engineers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap">
     <link rel="stylesheet" href="/shared/layout.css">
 </head>
-<body>
+<body class="wave-page">
 
-    <nav class="nav">
-        <span class="nav-wordmark">BTech Radar</span>
-        <button class="theme-btn" onclick="toggleTheme()">Theme</button>
-    </nav>
+    <!-- ── Starfield Background ──────────────────────────────── -->
+    <div id="starfield-wrap">
+        <canvas id="starfield-canvas"></canvas>
+    </div>
 
-    <main class="home-main">
+<main class="home-main">
         <section class="hero-section">
             <span class="hero-meta">v2.0 / Market Analysis Tool</span>
             <h1 class="hero-title">BTech Radar</h1>
-            <p class="hero-tagline">Real-time job market intelligence for the next generation of Indian engineers.</p>
+            <div class="hero-subtitle-wrap">
+                <span class="subtitle-part-1">Market Intelligence</span>
+                <span class="subtitle-part-2">Skill Gap Analysis</span>
+                <span class="subtitle-part-3">Curriculum Audit</span>
+                <span class="subtitle-part-4">Job Data</span>
+            </div>
         </section>
 
         <section class="cards-section">
-            <a href="/radar.html" class="feature-card">
+            <a href="/loading.html" class="feature-card">
                 <span class="card-number">01 / Radar</span>
-                <h2 class="card-title">Radar</h2>
+                <h2 class="card-title">Radar
+                    <span class="card-radar" aria-hidden="true">
+                        <span class="radar-sweep"></span>
+                        <span class="radar-ring-mid"></span>
+                        <span class="radar-ring-inner"></span>
+                        <span class="radar-center-dot"></span>
+                    </span>
+                </h2>
                 <p class="card-desc">Analyse job market demand, identify skill gaps, and audit your BTech curriculum against live industry data.</p>
                 <div class="card-footer">
-                    <span class="card-arrow">→</span>
+                    <span class="card-arrow">Launch Radar →</span>
                 </div>
             </a>
             <div class="feature-card disabled">
@@ -46,14 +61,141 @@
     </footer>
 
     <script>
-        if (localStorage.getItem('theme') === 'dark' ||
-            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
+        // ── Text Scramble ─────────────────────────────────────────
+        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let scrambling = false;
+
+        function scrambleText(el, finalText, duration = 0.8, speed = 0.04, onDone) {
+            if (scrambling) return;
+            scrambling = true;
+            const steps = Math.floor(duration / speed);
+            let step = 0;
+            const interval = setInterval(() => {
+                const progress = step / steps;
+                let out = '';
+                for (let i = 0; i < finalText.length; i++) {
+                    if (finalText[i] === ' ') { out += ' '; continue; }
+                    out += (progress * finalText.length > i)
+                        ? finalText[i]
+                        : CHARS[Math.floor(Math.random() * CHARS.length)];
+                }
+                el.textContent = out;
+                step++;
+                if (step > steps) {
+                    clearInterval(interval);
+                    el.textContent = finalText;
+                    scrambling = false;
+                    if (onDone) onDone();
+                }
+            }, speed * 1000);
         }
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('.hero-title');
+            if (!title) return;
+            scrambleText(title, 'BTech Radar', 1.2, 0.04);
+        });
+    </script>
+
+    <script>
+        // ── Starfield (ported from Starfield component) ───────────
+        (function () {
+            const canvas = document.getElementById('starfield-canvas');
+            const wrap   = document.getElementById('starfield-wrap');
+
+            const QUANTITY   = 512;
+            const SPEED      = 2;
+            const STAR_COLOR = 'rgba(255,255,255,1)';
+            const BG_FILL    = 'rgba(0,0,0,1)';
+            const ratio      = QUANTITY / 2;
+
+            let ctx, w, h, cx, cy, depth, colorRatio, stars = [];
+
+            function measure() {
+                w = wrap.clientWidth;
+                h = wrap.clientHeight;
+                cx = Math.round(w / 2);
+                cy = Math.round(h / 2);
+                depth = (w + h) / 2;
+                colorRatio = 1 / depth;
+            }
+
+            function setup() {
+                measure();
+                canvas.width  = w;
+                canvas.height = h;
+                ctx = canvas.getContext('2d');
+            }
+
+            function bigBang() {
+                stars = Array.from({ length: QUANTITY }, () => [
+                    Math.random() * w * 2 - cx * 2,        // [0] x offset from center
+                    Math.random() * h * 2 - cy * 2,        // [1] y offset from center
+                    Math.round(Math.random() * depth),      // [2] z depth
+                    0, 0, 0, 0,                             // [3-6] px, py, ppx, ppy
+                    true                                    // [7] visible
+                ]);
+            }
+
+            function resize() {
+                const ow = canvas.width, oh = canvas.height;
+                measure();
+                if (ow !== w || oh !== h) {
+                    const rw = w / ow, rh = h / oh;
+                    canvas.width  = w;
+                    canvas.height = h;
+                    stars = stars.map(s => {
+                        const n = [...s];
+                        n[0] = s[0] * rw;
+                        n[1] = s[1] * rh;
+                        n[3] = cx + (n[0] / n[2]) * ratio;
+                        n[4] = cy + (n[1] / n[2]) * ratio;
+                        return n;
+                    });
+                }
+            }
+
+            function update() {
+                stars = stars.map(s => {
+                    const n = [...s];
+                    n[7] = true;
+                    n[5] = n[3]; n[6] = n[4];   // save prev screen pos
+                    n[2] -= SPEED;
+                    if (n[2] > depth) { n[2] -= depth; n[7] = false; }
+                    if (n[2] < 0)     { n[2] += depth; n[7] = false; }
+                    n[3] = cx + (n[0] / n[2]) * ratio;
+                    n[4] = cy + (n[1] / n[2]) * ratio;
+                    return n;
+                });
+            }
+
+            function draw() {
+                ctx.fillStyle = BG_FILL;
+                ctx.fillRect(0, 0, w, h);
+                ctx.strokeStyle = STAR_COLOR;
+                stars.forEach(s => {
+                    if (s[5] > 0 && s[5] < w && s[6] > 0 && s[6] < h && s[7]) {
+                        ctx.lineWidth = (1 - colorRatio * s[2]) * 2;
+                        ctx.beginPath();
+                        ctx.moveTo(s[5], s[6]);
+                        ctx.lineTo(s[3], s[4]);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                });
+            }
+
+            function animate() {
+                resize();
+                update();
+                draw();
+                requestAnimationFrame(animate);
+            }
+
+            setup();
+            bigBang();
+            animate();
+        })();
     </script>
 </body>
 </html>
