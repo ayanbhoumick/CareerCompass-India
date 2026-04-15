@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTech Radar | Resume Analyser</title>
+    <link rel="stylesheet" href="/shared/layout.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-wordmark">BTech Radar</a>
+        <button class="theme-btn" onclick="toggleTheme()">Theme</button>
+    </nav>
+
+    <main class="coming-soon-main">
+        <p class="coming-soon-label">02 / Analyse my Resume</p>
+        <h1 class="coming-soon-title">Coming Soon</h1>
+        <p class="coming-soon-desc">Upload your resume and get a personalised skill report.<br>This feature is under construction.</p>
+        <a href="/" class="back-link">← Back to Home</a>
+    </main>
+
+    <footer class="footer">
+        <span>© 2026 BTech Radar India</span>
+        <span>v2.0</span>
+    </footer>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark' ||
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+    </script>
+</body>
+</html>

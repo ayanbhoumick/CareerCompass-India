@@ -11,7 +11,7 @@ import java.util.*;
 public class SkillGapService {
 
     @Autowired
-    private JobFetchService jobFetchService;
+    private JobAggregatorService jobFetchService;
 
     @Autowired
     private SkillExtractorService skillExtractorService;

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTech Radar | Skill Intelligence</title>
+    <link rel="stylesheet" href="/shared/layout.css">
+</head>
+<body>
+
+    <nav class="nav">
+        <a href="/" class="nav-wordmark">BTech Radar</a>
+        <div class="nav-actions">
+            <a href="/" class="nav-back">← Home</a>
+            <button class="theme-btn" onclick="toggleTheme()">Theme</button>
+        </div>
+    </nav>
+
+    <main class="radar-layout">
+
+        <!-- 01 / Parameters -->
+        <aside class="panel">
+            <div class="section-label">01 / Parameters</div>
+
+            <div class="field-group">
+                <label class="field-label" for="role">Target Role</label>
+                <input id="role" type="text" class="input" placeholder="e.g. Backend Engineer">
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="city">Target City</label>
+                <select id="city" class="input">
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Gurgaon">Gurgaon</option>
+                    <option value="Noida">Noida</option>
+                    <option value="Pune">Pune</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Kolkata">Kolkata</option>
+                    <option value="Ahmedabad">Ahmedabad</option>
+                    <option value="Kochi">Kochi</option>
+                    <option value="Coimbatore">Coimbatore</option>
+                    <option value="Bhubaneswar">Bhubaneswar</option>
+                    <option value="Indore">Indore</option>
+                    <option value="Jaipur">Jaipur</option>
+                    <option value="Chandigarh">Chandigarh</option>
+                    <option value="Visakhapatnam">Visakhapatnam</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="userSkills">Current Skills</label>
+                <textarea id="userSkills" rows="3" class="input" placeholder="Java, Python, Git..."></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" onclick="handleApi('gap')">
+                    <span>Analyze Skill Gap</span>
+                    <span>→</span>
+                </button>
+                <button class="btn" onclick="handleApi('curriculum')">
+                    <span>Audit Curriculum</span>
+                    <span>◫</span>
+                </button>
+                <button class="btn" onclick="handleApi('top')">
+                    <span>Market Demand</span>
+                    <span>↑</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 02 / Intelligence Output -->
+        <section class="panel output-panel">
+            <div class="section-label">02 / Intelligence Output</div>
+
+            <div id="loading-state" class="loading-state hidden">
+                <div class="spinner"></div>
+                <p>Processing Market Data...</p>
+            </div>
+
+            <div id="results-content">
+                <div id="placeholder-content" class="placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                    </svg>
+                    <p>Awaiting Input Parameters</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>© 2026 BTech Radar India</span>
+        <span>Built for Indian CS Ecosystem</span>
+    </footer>
+
+    <!-- ── Templates ──────────────────────────────────────── -->
+    <template id="tpl-gap">
+        <div class="gap-result">
+            <div class="result-header">
+                <h3>Gap Analysis</h3>
+                <div class="score-box">
+                    <span id="res-score" class="score-value">0%</span>
+                    <p class="score-label">Match Score</p>
+                </div>
+            </div>
+            <div class="result-grid">
+                <div>
+                    <p class="result-section-label">Matched Skills</p>
+                    <div id="res-matched" class="tags-container"></div>
+                    <p class="result-section-label">Missing Skills</p>
+                    <div id="res-missing" class="tags-container"></div>
+                </div>
+                <div class="rec-panel">
+                    <p class="result-section-label" style="margin-top:0">Roadmap</p>
+                    <ul id="res-rec" class="rec-list"></ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-top">
+        <div class="top-result">
+            <h3>Market Demand</h3>
+            <div class="chart-wrapper">
+                <canvas id="topChart"></canvas>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-curriculum">
+        <div class="curriculum-result">
+            <h3>Curriculum Audit</h3>
+            <div class="coverage-block">
+                <div class="coverage-header">
+                    <span class="section-label" style="margin:0">Syllabus Coverage</span>
+                    <span id="curr-perc" class="coverage-perc">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div id="curr-bar" class="progress-fill"></div>
+                </div>
+            </div>
+            <div id="subject-scores" class="subjects-grid"></div>
+        </div>
+    </template>
+
+    <!-- ── Scripts ────────────────────────────────────────── -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        // ── Theme ────────────────────────────────────────────────
+        if (localStorage.getItem('theme') === 'dark' ||
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            if (myChart) {
+                const isDark = document.documentElement.classList.contains('dark');
+                myChart.options.plugins.legend.labels.color = isDark ? '#f0f0f0' : '#111111';
+                myChart.update();
+            }
+        }
+
+        // ── API ──────────────────────────────────────────────────
+        let myChart = null;
+        const resultsEl = document.getElementById('results-content');
+        const loaderEl  = document.getElementById('loading-state');
+
+        async function handleApi(type) {
+            const role       = document.getElementById('role').value.trim();
+            const city       = document.getElementById('city').value;
+            const userSkills = document.getElementById('userSkills').value;
+
+            if (!role) { alert('Please enter a target role'); return; }
+
+            resultsEl.classList.add('hidden');
+            loaderEl.classList.remove('hidden');
+
+            try {
+                if (type === 'top') {
+                    const res  = await fetch(`/api/skills/demand?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}&topN=15`);
+                    const data = await res.json();
+                    showResults(() => renderTop(data));
+                }
+
+                if (type === 'gap') {
+                    const skills = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    if (!skills.length) { alert('Please enter your current skills'); loaderEl.classList.add('hidden'); resultsEl.classList.remove('hidden'); return; }
+                    const res  = await fetch(`/api/skills/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skills)
+                    });
+                    const data = await res.json();
+                    showResults(() => renderGap(data));
+                }
+
+                if (type === 'curriculum') {
+                    const skills = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    const res  = await fetch(`/api/curriculum/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skills)
+                    });
+                    const data = await res.json();
+                    showResults(() => renderCurriculum(data));
+                }
+
+            } catch (err) {
+                loaderEl.classList.add('hidden');
+                resultsEl.classList.remove('hidden');
+                resultsEl.innerHTML = `<p style="color:var(--accent);font-size:0.75rem;font-weight:700;padding:40px 0;text-align:center">Error fetching data. Make sure the server is running.</p>`;
+                console.error(err);
+            }
+        }
+
+        function showResults(renderFn) {
+            loaderEl.classList.add('hidden');
+            resultsEl.innerHTML = '';
+            resultsEl.classList.remove('hidden');
+            renderFn();
+            gsap.fromTo(resultsEl, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+        }
+
+        // ── Render: Gap ──────────────────────────────────────────
+        function renderGap(data) {
+            const tpl = document.getElementById('tpl-gap').content.cloneNode(true);
+            resultsEl.appendChild(tpl);
+
+            const scoreEl   = document.getElementById('res-score');
+            const matchedEl = document.getElementById('res-matched');
+            const missingEl = document.getElementById('res-missing');
+            const recEl     = document.getElementById('res-rec');
+
+            // Animated score counter
+            gsap.to({ val: 0 }, {
+                val: Math.round(data.matchScore),
+                duration: 1.2,
+                ease: 'power2.out',
+                onUpdate() { scoreEl.textContent = Math.round(this.targets()[0].val) + '%'; }
+            });
+
+            data.matchedSkills.forEach(s => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag matched';
+                tag.textContent = s;
+                matchedEl.appendChild(tag);
+            });
+
+            data.missingSkills.forEach(s => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag missing';
+                tag.textContent = s;
+                missingEl.appendChild(tag);
+            });
+
+            const recs = data.reccommendations || data.recommendations || [];
+            recs.forEach(r => {
+                const li = document.createElement('li');
+                li.textContent = r;
+                recEl.appendChild(li);
+            });
+
+            // Staggered tag appearance
+            gsap.to('.skill-tag', { opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out', delay: 0.3 });
+        }
+
+        // ── Render: Top Demand ───────────────────────────────────
+        function renderTop(data) {
+            const tpl = document.getElementById('tpl-top').content.cloneNode(true);
+            resultsEl.appendChild(tpl);
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#f0f0f0' : '#111111';
+
+            if (myChart) myChart.destroy();
+
+            const ctx = document.getElementById('topChart').getContext('2d');
+            const totalDemand = data.reduce((a, d) => a + d.demandCount, 0);
+
+            const centerTextPlugin = {
+                id: 'centerText',
+                beforeDraw(chart) {
+                    const meta = chart.getDatasetMeta(0);
+                    if (!meta.data.length) return;
+                    const { x: cx, y: cy } = meta.data[0];
+                    const c = chart.ctx;
+                    c.restore();
+                    c.font = `bold 2rem 'Geist Mono', monospace`;
+                    c.textBaseline = 'middle';
+                    c.fillStyle = textColor;
+                    const text = totalDemand.toLocaleString();
+                    c.fillText(text, Math.round(cx - c.measureText(text).width / 2), cy - 8);
+                    c.font = `0.7rem 'Geist Mono', monospace`;
+                    c.fillStyle = isDark ? '#888' : '#666';
+                    const sub = 'Total Postings';
+                    c.fillText(sub, Math.round(cx - c.measureText(sub).width / 2), cy + 16);
+                    c.save();
+                }
+            };
+
+            const palette = ['#ff3333','#ff6666','#ff9999','#ff0000','#cc0000',
+                             '#ff4444','#ff2222','#ff8888','#ffaaaa','#ff5555',
+                             '#dd0000','#bb0000','#ee3333','#ff1111','#cc3333'];
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.demandCount),
+                        backgroundColor: palette.slice(0, data.length),
+                        borderWidth: 1,
+                        borderColor: isDark ? '#0a0a0a' : '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: { family: "'Geist Mono', monospace", size: 11, weight: '600' },
+                                color: textColor,
+                                boxWidth: 12,
+                                padding: 12
+                            }
+                        }
+                    }
+                },
+                plugins: [centerTextPlugin]
+            });
+        }
+
+        // ── Render: Curriculum ───────────────────────────────────
+        function renderCurriculum(data) {
+            const tpl = document.getElementById('tpl-curriculum').content.cloneNode(true);
+            resultsEl.appendChild(tpl);
+
+            setTimeout(() => {
+                const pct = Math.round(data.coveragePercentage);
+                document.getElementById('curr-bar').style.width  = pct + '%';
+                document.getElementById('curr-perc').textContent = pct + '%';
+            }, 100);
+
+            const grid = document.getElementById('subject-scores');
+            Object.entries(data.subjectRelevanceScores).forEach(([sub, score]) => {
+                grid.innerHTML += `
+                    <div class="subject-card">
+                        <span class="subject-name">${sub}</span>
+                        <span class="subject-score">${Math.round(score)}</span>
+                    </div>`;
+            });
+        }
+    </script>
+</body>
+</html>
