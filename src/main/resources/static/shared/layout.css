@@ -463,7 +463,7 @@ select.input option { background: var(--bg); color: var(--text); }
 .rec-list li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
 
 /* ─── Top Demand Result ───────────────────────────────────── */
-.top-result { display: flex; flex-direction: column; gap: 24px; }
+.top-result { display: flex; flex-direction: column; gap: 16px; }
 .top-result h3 {
   font-size: 2.2rem;
   font-weight: 700;
@@ -949,7 +949,7 @@ body.radar-page {
   flex-direction: column;
 }
 .result-pad {
-  padding: 70px;
+  padding: 48px 60px;
   flex: 1;
 }
 

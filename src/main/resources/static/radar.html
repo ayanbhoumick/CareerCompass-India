@@ -698,11 +698,35 @@
 
             const ctx = document.getElementById('topChart').getContext('2d');
 
-            const palette = [
-              '#c41111', '#d42222', '#e44433', '#f05544', '#f56633',
-              '#f07722', '#e88811', '#d49900', '#bb7700', '#a45500',
-              '#cc3344', '#dd5533', '#e87722', '#d48800', '#b86600'
-            ];
+            // Smooth red→orange gradient — no outliers, rank-correlated
+            function barPalette(n) {
+                return Array.from({ length: n }, (_, i) => {
+                    const t = i / Math.max(n - 1, 1);
+                    const h = Math.round(t * 30);
+                    const s = Math.round(92 - t * 8);
+                    const l = Math.round(46 - t * 6);
+                    return `hsl(${h},${s}%,${l}%)`;
+                });
+            }
+            const colors = barPalette(data.length);
+
+            // Inline plugin: value labels at bar ends
+            const valueLabels = {
+                id: 'barValueLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx: c, scales: { x } } = chart;
+                    const meta = chart.getDatasetMeta(0);
+                    c.save();
+                    c.font = `600 10px 'Geist Mono', monospace`;
+                    c.fillStyle = mutedColor;
+                    c.textBaseline = 'middle';
+                    meta.data.forEach((bar, i) => {
+                        const val = chart.data.datasets[0].data[i];
+                        c.fillText(val, x.getPixelForValue(val) + 7, bar.y);
+                    });
+                    c.restore();
+                }
+            };
 
             myChart = new Chart(ctx, {
                 type: 'bar',
@@ -710,16 +734,21 @@
                     labels: data.map(d => d.name),
                     datasets: [{
                         data: data.map(d => d.demandCount),
-                        backgroundColor: palette.slice(0, data.length),
+                        backgroundColor: colors,
                         borderWidth: 0,
-                        borderRadius: 3,
+                        borderRadius: 4,
                         borderSkipped: false,
+                        maxBarThickness: 22,
+                        barPercentage: 0.72,
+                        categoryPercentage: 0.88,
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 550, easing: 'easeOutQuart' },
+                    layout: { padding: { top: 4, right: 48, bottom: 4, left: 0 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -738,24 +767,26 @@
                     },
                     scales: {
                         x: {
-                            grid:   { color: borderColor },
-                            border: { color: borderColor },
+                            grid:   { color: borderColor, drawBorder: false },
+                            border: { display: false },
                             ticks: {
-                                font:      { family: "'Geist Mono', monospace", size: 11 },
-                                color:     mutedColor,
-                                precision: 0,
+                                font:          { family: "'Geist Mono', monospace", size: 10 },
+                                color:         mutedColor,
+                                precision:     0,
+                                maxTicksLimit: 7,
                             }
                         },
                         y: {
                             grid:   { display: false },
-                            border: { color: borderColor },
+                            border: { display: false },
                             ticks: {
                                 font:  { family: "'Geist Mono', monospace", size: 11, weight: '600' },
                                 color: textColor,
                             }
                         }
                     }
-                }
+                },
+                plugins: [valueLabels]
             });
         }
 
