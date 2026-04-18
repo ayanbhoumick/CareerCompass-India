@@ -109,7 +109,8 @@
         .top-chart-row {
             display: flex;
             align-items: center;
-            gap: 52px;
+            justify-content: center;
+            gap: 56px;
             margin-top: 8px;
         }
         .chart-wrapper {
@@ -118,16 +119,17 @@
             padding: 0 !important;
             box-shadow: none !important;
             flex-shrink: 0;
-            width: 340px;
-            height: 340px;
-            max-height: 340px;
+            width: 400px;
+            height: 400px;
+            max-height: 400px;
         }
         #top-legend {
-            flex: 1;
+            flex: 0 0 auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
             align-self: center;
+            min-width: 180px;
         }
         .top-legend-item {
             display: flex;
@@ -567,10 +569,18 @@
 
         // ── API ──────────────────────────────────────────────────
         let myChart = null;
+        let loadingTimer = null;
         const resultsEl = document.getElementById('results-content');
         const loaderEl  = document.getElementById('loading-state');
 
         const META_LABELS = { gap: 'Gap', curriculum: 'Audit', top: 'Market' };
+
+        function showError(msg) {
+            clearTimeout(loadingTimer);
+            loaderEl.classList.add('hidden');
+            resultsEl.classList.remove('hidden');
+            resultsEl.innerHTML = `<div class="result-pad"><p style="color:var(--accent);font-size:0.75rem;font-weight:700;padding:40px 0;text-align:center">${msg}</p></div>`;
+        }
 
         async function handleApi(type) {
             const role       = document.getElementById('role').value.trim();
@@ -588,36 +598,48 @@
             resultsEl.classList.add('hidden');
             loaderEl.classList.remove('hidden');
 
+            clearTimeout(loadingTimer);
+            loadingTimer = setTimeout(() => {
+                showError('Request timed out (30s). Check your connection or try again.');
+            }, 30000);
+
             try {
                 if (type === 'top') {
                     const res  = await fetch(`/api/skills/demand?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}&topN=15`);
+                    if (!res.ok) throw new Error(`Server error ${res.status}`);
                     const data = await res.json();
+                    clearTimeout(loadingTimer);
                     showResults(() => renderTop(data));
                 }
 
                 if (type === 'gap') {
-                    const skills = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-                    if (!skills.length) { alert('Please enter your skills'); loaderEl.classList.add('hidden'); resultsEl.classList.remove('hidden'); return; }
+                    const skills = [...new Set(userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean))].slice(0, 50);
+                    if (!skills.length) { clearTimeout(loadingTimer); loaderEl.classList.add('hidden'); resultsEl.classList.remove('hidden'); alert('Please enter your skills'); return; }
                     const res  = await fetch(`/api/skills/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skills)
                     });
+                    if (!res.ok) throw new Error(`Server error ${res.status}`);
                     const data = await res.json();
+                    clearTimeout(loadingTimer);
                     showResults(() => renderGap(data));
                 }
 
                 if (type === 'curriculum') {
-                    const skills = userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    const skills = [...new Set(userSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean))].slice(0, 50);
                     const res  = await fetch(`/api/curriculum/gap?role=${encodeURIComponent(role)}&city=${encodeURIComponent(city)}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skills)
                     });
+                    if (!res.ok) throw new Error(`Server error ${res.status}`);
                     const data = await res.json();
+                    clearTimeout(loadingTimer);
                     showResults(() => renderCurriculum(data));
                 }
 
             } catch (err) {
-                loaderEl.classList.add('hidden');
-                resultsEl.classList.remove('hidden');
-                resultsEl.innerHTML = `<div class="result-pad"><p style="color:var(--accent);font-size:0.75rem;font-weight:700;padding:40px 0;text-align:center">Error fetching data. Make sure the server is running.</p></div>`;
+                const msg = (err.message || '').includes('fetch')
+                    ? 'Network error — check your connection.'
+                    : `${err.message || 'Unknown error'} — make sure the server is running.`;
+                showError(msg);
                 console.error(err);
             }
         }
@@ -661,12 +683,18 @@
                 missingEl.appendChild(tag);
             });
 
-            const recs = data.reccommendations || data.recommendations || [];
-            recs.forEach(r => {
+            const recs = data.recommendations || [];
+            if (recs.length === 0) {
                 const li = document.createElement('li');
-                li.textContent = r;
+                li.textContent = 'No gaps — you already match all demanded skills.';
                 recEl.appendChild(li);
-            });
+            } else {
+                recs.forEach(r => {
+                    const li = document.createElement('li');
+                    li.textContent = r;
+                    recEl.appendChild(li);
+                });
+            }
 
             gsap.to('.skill-tag', { opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out', delay: 0.3 });
         }
