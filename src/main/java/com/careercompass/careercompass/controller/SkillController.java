@@ -15,8 +15,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
-
 public class SkillController {
+
     @Autowired
     private JobAggregatorService jobFetchService;
 
@@ -29,44 +29,56 @@ public class SkillController {
     @Autowired
     private CurriculumGapService curriculumGapService;
 
-    // Health check
     @GetMapping("/health")
     public String health() {
         return "BTech Radar is running!";
     }
 
-    // get top demanded skills for a role and city
     @GetMapping("/skills/demand")
     public List<Skill> getSkillDemand(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
             @RequestParam(name = "city", defaultValue = "Mumbai") String city,
             @RequestParam(name = "topN", defaultValue = "15") int topN) {
 
+        int safeTopN = Math.min(Math.max(topN, 1), 20);
+
         List<String> descriptions = jobFetchService.fetchJobs(role, city)
                 .stream()
                 .map(job -> job.getDescription())
                 .toList();
 
-        return skillExtractorService.getTopDemandedSkills(descriptions, topN);
+        return skillExtractorService.getTopDemandedSkills(descriptions, safeTopN);
     }
 
-    // get skill gap report for a student
     @PostMapping("/skills/gap")
     public SkillGapReport getSkillGap(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
             @RequestParam(name = "city", defaultValue = "Mumbai") String city,
             @RequestBody List<String> studentSkills) {
 
-        return skillGapService.analyzeGap(studentSkills, role, city);
+        List<String> cleaned = studentSkills.stream()
+                .filter(s -> s != null && !s.isBlank())
+                .map(String::toLowerCase)
+                .distinct()
+                .limit(50)
+                .toList();
+
+        return skillGapService.analyzeGap(cleaned, role, city);
     }
 
-    // get curriculum gap report
     @PostMapping("/curriculum/gap")
     public CurriculumGapReport getCurriculumGap(
             @RequestParam(name = "role", defaultValue = "software engineer") String role,
             @RequestParam(name = "city", defaultValue = "Mumbai") String city,
             @RequestBody List<String> studentSkills) {
 
-        return curriculumGapService.analyzeCurriculum(studentSkills, role, city);
+        List<String> cleaned = studentSkills.stream()
+                .filter(s -> s != null && !s.isBlank())
+                .map(String::toLowerCase)
+                .distinct()
+                .limit(50)
+                .toList();
+
+        return curriculumGapService.analyzeCurriculum(cleaned, role, city);
     }
 }
