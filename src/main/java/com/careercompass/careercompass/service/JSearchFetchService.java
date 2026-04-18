@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +20,20 @@ public class JSearchFetchService {
     @Value("${jsearch.api.key}")
     private String apiKey;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public JSearchFetchService() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(15_000);
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     public List<JobListing> fetchJobs(String role, String city) {
         try {
-            String query = (role + " jobs in India").replace(" ", "%20");
+            String queryText = role + " jobs in " + city;
+            String query = URLEncoder.encode(queryText, StandardCharsets.UTF_8);
             String url = "https://jsearch.p.rapidapi.com/search?query=" + query + "&page=1&num_pages=2&country=in";
 
             HttpHeaders headers = new HttpHeaders();
@@ -38,13 +49,13 @@ public class JSearchFetchService {
             List<JobListing> listings = new ArrayList<>();
             if (data != null && data.isArray()) {
                 for (JsonNode job : data) {
-                    String title = job.path("job_title").asText("Unknown");
-                    String company = job.path("employer_name").asText("Unknown");
+                    String title    = job.path("job_title").asText("Unknown");
+                    String company  = job.path("employer_name").asText("Unknown");
                     String location = job.path("job_city").asText(city);
-                    String description = job.path("job_description").asText("");
-                    Double salaryMin = job.path("job_min_salary").asDouble(0.0);
-                    Double salaryMax = job.path("job_max_salary").asDouble(0.0);
-                    listings.add(new JobListing(title, company, location, description, salaryMin, salaryMax));
+                    String desc     = job.path("job_description").asText("");
+                    Double salMin   = job.path("job_min_salary").asDouble(0.0);
+                    Double salMax   = job.path("job_max_salary").asDouble(0.0);
+                    listings.add(new JobListing(title, company, location, desc, salMin, salMax));
                 }
             }
             return listings;
