@@ -974,8 +974,10 @@ body.radar-page {
   mask-image: none;
   -webkit-mask-image: none;
 }
-#loading-state,
-#results-content { position: relative; z-index: 1; flex: 1; overflow: hidden; min-height: 0; }
+/* loading state fills radar-output and clips spinner */
+#loading-state { position: relative; z-index: 1; flex: 1; overflow: hidden; min-height: 0; }
+/* results content grows naturally — lets radar-output scroll */
+#results-content { position: relative; z-index: 1; }
 
 /* Sidebar structure */
 .sidebar-section { padding: 28px 24px 18px; }

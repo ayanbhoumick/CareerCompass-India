@@ -217,6 +217,26 @@
             border-color: var(--ra-accent) !important;
             color: var(--ra-accent) !important;
         }
+
+        /* ── RA overrides: swap red → indigo throughout result ── */
+        /* Missing tags: indigo instead of red */
+        .skill-tag.missing {
+            border-color: color-mix(in srgb, var(--ra-accent) 55%, transparent);
+            color: var(--ra-accent);
+        }
+        /* Score cards: indigo left-border accent instead of plain box */
+        .score-card {
+            border-left: 3px solid color-mix(in srgb, var(--ra-accent) 55%, transparent);
+        }
+        /* Issue marker: indigo exclamation instead of red */
+        .issue-list li:not(.empty-state)::before {
+            color: var(--ra-accent);
+        }
+        /* Suggestion arrows: indigo instead of green */
+        .suggestion-list li::before {
+            color: var(--ra-accent);
+            opacity: 0.7;
+        }
         /* DESIGN-02: Grade label at 0.68rem uppercase — matches .score-label from layout.css */
         .score-card-grade {
             font-size: 0.68rem;
@@ -320,16 +340,14 @@
         }
 
         /* ── Doc-ghost placeholder ───────────────────────────── */
-        #results-content { display: flex; flex-direction: column; }
 
         .resume-placeholder {
-            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 28px;
-            min-height: 400px;
+            min-height: calc(100vh - var(--nav-h));
         }
 
         .doc-ghost {
