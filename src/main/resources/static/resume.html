@@ -141,6 +141,8 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-muted);
+            word-break: break-all;
+            max-width: 100%;
         }
         .file-upload-hint {
             font-size: 0.62rem;
@@ -150,14 +152,6 @@
             color: var(--text-muted);
             opacity: 0.45;
         }
-        .file-upload-filename {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--success);
-            word-break: break-all;
-            max-width: 100%;
-        }
-
         /* ── JD Textarea ─────────────────────────────────────── */
         .jd-textarea {
             width: 100%;
@@ -257,7 +251,7 @@
             align-items: flex-start;
             gap: 10px;
         }
-        .issue-list li::before {
+        .issue-list li:not(.empty-state)::before {
             content: '!';
             color: var(--accent);
             flex-shrink: 0;
@@ -767,6 +761,16 @@
                 return;
             }
 
+            if (file.size > 10 * 1024 * 1024) {
+                uploadBox.classList.add('error-file');
+                uploadBox.classList.remove('has-file');
+                uploadText.textContent = 'File too large';
+                uploadHint.textContent = 'Max 10 MB accepted';
+                metaFileEl.textContent = '—';
+                fileInput.value = '';
+                return;
+            }
+
             uploadBox.classList.remove('error-file');
             uploadBox.classList.add('has-file');
             uploadText.textContent = file.name;
@@ -896,6 +900,9 @@
                 tag.textContent = kw;
                 matchedEl.appendChild(tag);
             });
+            if ((data.matchedKeywords || []).length === 0) {
+                matchedEl.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);opacity:0.5">None found</span>';
+            }
 
             // ── Missing keywords — red tags (layout.css .skill-tag.missing)
             const missingEl = document.getElementById('res-missing');
@@ -905,6 +912,9 @@
                 tag.textContent = kw;
                 missingEl.appendChild(tag);
             });
+            if ((data.missingKeywords || []).length === 0) {
+                missingEl.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);opacity:0.5">None found</span>';
+            }
 
             // DESIGN-02: skill-tag starts at opacity:0 in layout.css — animate in
             gsap.to('.skill-tag', { opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out', delay: 0.35 });
@@ -914,6 +924,7 @@
             const issues   = data.qualityIssues || [];
             if (issues.length === 0) {
                 const li = document.createElement('li');
+                li.className = 'empty-state';
                 li.textContent = 'No quality issues found.';
                 issuesEl.appendChild(li);
             } else {
